@@ -1,6 +1,7 @@
 # RXSend Breach — 后端源码仓库
 
-Garry's Mod `rxsend_breach` 游戏模式的服务端 / 共享 / 客户端源码备份仓库。
+Garry's Mod `rxsend_breach` 游戏模式的服务端 / 共享 / 客户端源码备份仓库，
+外加服务器资源清单与部署工具。
 
 - **基线来源**：现网服务器 `orisland`，路径 `/srv/rxsend/server/garrysmod/gamemodes/rxsend_breach`
 - **抓取时间**：2026-11-06 08:43 (+08:00)
@@ -8,7 +9,7 @@ Garry's Mod `rxsend_breach` 游戏模式的服务端 / 共享 / 客户端源码�
 - **基线清单**：`docs/baseline.sha256`（服务端 `sha256sum` 原始输出）
 
 > 本仓库**只放代码与配置**，不含地图 / 模型 / 材质 / 音频等资源文件。
-> 资源在服务器上约 17 GB，不适合进 Git。
+> 资源在服务器上约 16.6 GiB，不适合进 Git；改用 `inventory/` 下的哈希清单跟踪。
 
 ---
 
@@ -33,6 +34,14 @@ deployment/                       systemd 包装与运维脚本
 ├── run-test-server.py            服务启动包装（ExecStart）
 ├── server-control.py             本地 RCON 控制 / 优雅停机
 └── initialize-test-server.py     首次部署初始化
+
+tools/
+├── rx_inventory.py               生成资源清单（只读，20 秒扫全库）
+└── rx_inventory_diff.py          对比两份清单，找出新增/删除/改动/移动
+
+inventory/
+├── README.md                     清单用法说明
+└── server-YYYY-MM-DD.tsv         资源清单快照（36,081 个文件）
 
 docs/
 ├── 01-服务器勘察报告.md           服务器 / 代码 / 缺口的完整勘察
@@ -81,6 +90,25 @@ sudo systemctl start rxsend-server
 
 ---
 
+## 资源清单（不是备份）
+
+资源文件（地图 / 模型 / 材质 / 音频）不进 Git，改用哈希清单跟踪位置与内容变化。
+详见 [inventory/README.md](inventory/README.md)。
+
+```bash
+# 生成（服务器上，只读，20 秒）
+sudo python3 tools/rx_inventory.py --root /srv/rxsend/server \
+     --out inventory/server-$(date +%F).tsv --summary
+
+# 对比两个时间点
+python3 tools/rx_inventory_diff.py inventory/server-2026-11-06.tsv inventory/server-2026-12-01.tsv
+```
+
+能回答：哪些文件被改了、新增了什么、**某个文件被挪到哪去了**（按 sha256 配对）、
+权限属主有没有被搞乱。**不能**还原内容 —— 地图与模型的实体副本由团队另行保存。
+
+---
+
 ## 已知缺口（详见 docs/01-服务器勘察报告.md）
 
 1. `ROUNDS` 表只有 `normal` 和 `ww2tdm` 两个条目；`ulx forceround` 却承诺 8 个模式名。
@@ -97,6 +125,7 @@ sudo systemctl start rxsend-server
 - 每次交付打包时，`manifest.json` 的 old-hash 必须对应本仓库当前 commit 的文件哈希。
 - `.gitattributes` 设为 `* -text`：禁止换行归一化，保证 git blob 与服务端文件字节一致。
 - 机密（`rcon_password`、`sv_password`）只存在于服务端 `cfg/rxsend-test.private.cfg`，永不入库。
+- 动过资源文件（上传新地图 / 替换模型包）后，重新生成一份 `inventory/` 快照再提交。
 
 ---
 
