@@ -1,12 +1,14 @@
 # RXSend Breach — 后端源码仓库
 
 Garry's Mod `rxsend_breach` 游戏模式的服务端 / 共享 / 客户端源码备份仓库，
-外加服务器资源清单与部署工具。
+外加资源清单、部署工具与交接文档。
 
-- **基线来源**：现网服务器 `orisland`，路径 `/srv/rxsend/server/garrysmod/gamemodes/rxsend_breach`
+> **第一次来？先读 [docs/00-交接总览.md](docs/00-交接总览.md)。**
+
+- **基线来源**：现网服务器 `orisland`，`/srv/rxsend/server/garrysmod/gamemodes/rxsend_breach`
 - **抓取时间**：2026-11-06 08:43 (+08:00)
 - **校验方式**：544 个文件逐一比对 SHA256，`MATCH 544 / MISMATCH 0 / MISSING 0`
-- **基线清单**：`docs/baseline.sha256`（服务端 `sha256sum` 原始输出）
+- **基线清单**：`docs/baseline.sha256`
 
 > 本仓库**只放代码与配置**，不含地图 / 模型 / 材质 / 音频等资源文件。
 > 资源在服务器上约 16.6 GiB，不适合进 Git；改用 `inventory/` 下的哈希清单跟踪。
@@ -44,7 +46,12 @@ inventory/
 └── server-YYYY-MM-DD.tsv         资源清单快照（36,081 个文件）
 
 docs/
-├── 01-服务器勘察报告.md           服务器 / 代码 / 缺口的完整勘察
+├── 00-交接总览.md                 ★ 入口：现状、资产、风险、索引
+├── 01-服务器勘察报告.md           硬件 / 网络 / 进程 / 资源 / 日志异常
+├── 02-代码架构与扩展点.md         装载链、模块地图、5 类扩展点、5 个坑
+├── 03-阵营与模式现状.md           BREACH_ROLES / gteams / 支援系统 / ROUNDS / 断点
+├── 04-接入与部署指南.md           连接、运维、部署管线、检查清单、禁止事项
+├── 05-待确认事项.md               阻塞项、待拍板设计、推进顺序
 └── baseline.sha256              基线校验清单
 ```
 
@@ -65,7 +72,7 @@ docs/
 
 ## 部署流程（**不要直接改现网文件**）
 
-服务器上没有 git，历史交付走带哈希清单的暂存包：
+服务器上没有 git，交付走带哈希清单的暂存包：
 
 ```
 /srv/rxsend/staging/<name>/     ← 必须放在 /srv/rxsend/server 之外
@@ -88,6 +95,8 @@ sudo systemctl start rxsend-server
 `apply.py` 会拒绝：符号链接、路径穿越、未知归档条目、old-hash 不匹配、进程仍持有实例锁。
 替换时保留原文件的 mode / UID / GID，异常时按已知哈希自动回滚。
 
+详见 [docs/04-接入与部署指南.md](docs/04-接入与部署指南.md)。
+
 ---
 
 ## 资源清单（不是备份）
@@ -109,13 +118,14 @@ python3 tools/rx_inventory_diff.py inventory/server-2026-11-06.tsv inventory/ser
 
 ---
 
-## 已知缺口（详见 docs/01-服务器勘察报告.md）
+## 已知缺口（详见 docs/03-阵营与模式现状.md）
 
-1. `ROUNDS` 表只有 `normal` 和 `ww2tdm` 两个条目；`ulx forceround` 却承诺 8 个模式名。
+1. `ROUNDS` 表只有 `normal` 和 `ww2tdm` 两条；`ulx forceround` 却承诺 8 个模式名。
 2. `BREACH_ROLES.MINIGAMES.minigame.roles` 只有 `[1..3]`，而 `Setuphl2` / `SetupCTF` 取 `roles[4]` —— 触发即崩。
 3. 这些模式所需的地图全局量（`SPAWN_NAZI_1`、`SPAWN_USA_1`、`EVENTPODAVAL`、`BREACH.CTF.*`）在本图不存在。
 4. 主模式 `normal.endcheck` 的胜负判定整段被注释。
 5. 18 个 SCP 出生点在 `mapconfigs/rxsend_site19-1.lua` 中缺失，回落默认表。
+6. 服务器 16 槽 + `GetRoleTable` 的合并逻辑，导致 `SECURITY` 阵营永远分配不到玩家。
 
 ---
 
