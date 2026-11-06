@@ -1,0 +1,19 @@
+-- if SERVER then
+--     hook.Add("PlayerSpawn", "Force_QRT_Hands_After_Gamemode", function(ply)
+--         -- 核心：等 0.5 秒。让 NextOren 模式把该发的模型、阵营、武器全部分配完毕。
+--         -- 避开生命周期的冲突！
+--         timer.Simple(0.5, function()
+--             if IsValid(ply) and ply:Alive() then
+--                 -- 检查他现在的衣服是不是新版 OBR
+--                 if ply:GetModel() == "models/cultist/humans/obr/obr_new.mdl" then
+--                     -- 直接抓取他身上的手臂实体
+--                     local hands = ply:GetHands()
+--                     if IsValid(hands) then
+--                         -- 强行把正确的手臂模型怼进去！
+--                         hands:SetModel("models/cultist/humans/obr/hands/c_arms_obr_new.mdl")
+--                     end
+--                 end
+--             end
+--         end)
+--     end)
+-- end

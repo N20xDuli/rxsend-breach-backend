@@ -1,0 +1,10 @@
+# Runtime, resources and private configuration are not source history.
+content/
+data/
+cfg/
+settings/
+*.db
+*.db-*
+*.log
+*.gma
+*.bak

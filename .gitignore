@@ -1,0 +1,64 @@
+# ==========================================================
+# RXSend 后端源码仓库 —— 只放代码与配置，不放资源
+# 基线：现网 orisland:/srv/rxsend/server 于 2026-11-06 抓取
+# ==========================================================
+
+# ---------- 资源文件（地图 / 模型 / 材质 / 音频 / 打包） ----------
+**/content/
+**/models/
+**/materials/
+**/sound/
+**/maps/
+*.bsp
+*.nav
+*.mdl
+*.vvd
+*.vtx
+*.phy
+*.vmt
+*.vtf
+*.wav
+*.mp3
+*.ogg
+*.vpk
+*.gma
+*.lmp
+*.pcf
+
+# ---------- 构建产物 ----------
+gamemode/gamemode.zip
+*.zip
+*.7z
+*.tar
+*.tar.gz
+*.tar.zst
+*.tgz
+
+# ---------- 机密（绝不入库） ----------
+*.private.cfg
+*secret*
+*.key
+*.pem
+*.pfx
+
+# ---------- 运行时数据 ----------
+*.log
+logs/
+data/
+settings/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# ---------- Python ----------
+__pycache__/
+*.pyc
+*.pyo
+
+# ---------- 编辑器 / 系统 ----------
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
